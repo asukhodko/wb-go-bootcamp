@@ -8,9 +8,6 @@ import (
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/facade"
 )
 
-// Тема: 1. Массивы и срезы
-// Задание: Реализовать паттерн фасад https://en.wikipedia.org/wiki/Facade_pattern  в соответствии с конвенцией
-
 func main() {
 	demoFacadeForPerson("SomePerson", "+79161234567", false)
 	demoFacadeForPerson("SomeStrangePerson", "+19993216547", true)
