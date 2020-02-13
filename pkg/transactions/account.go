@@ -25,6 +25,7 @@ func (a *Account) Deposit(amount float32) error {
 		date:   time.Now(),
 		amount: amount,
 	})
+	a.balance += amount
 	return nil
 }
 
@@ -40,11 +41,12 @@ func (a *Account) Withdraw(amount float32) error {
 		date:   time.Now(),
 		amount: -amount,
 	})
+	a.balance -= amount
 	return nil
 }
 
-// Statement возвращает выписку по счёту за период
-func (a *Account) Statement(from, to time.Time) (inBal, outBal float32, ops []Operation) {
+// GetStatement возвращает выписку по счёту за период
+func (a *Account) GetStatement(from, to time.Time) (inBal, outBal float32, ops []Operation) {
 	for _, op := range a.ops {
 		if op.date.Before(from) {
 			inBal += op.amount
@@ -55,4 +57,8 @@ func (a *Account) Statement(from, to time.Time) (inBal, outBal float32, ops []Op
 		}
 	}
 	return
+}
+
+func (a *Account) GetBalance() float32 {
+	return a.balance
 }

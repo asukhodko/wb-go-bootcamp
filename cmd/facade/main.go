@@ -10,29 +10,39 @@ import (
 // Задание: Реализовать паттерн фасад https://en.wikipedia.org/wiki/Facade_pattern  в соответствии с конвенцией
 
 func main() {
-	demoFacadeForPerson("SomePerson")
-	demoFacadeForPerson("SomeStrangePerson")
+	demoFacadeForPerson("SomePerson", false)
+	demoFacadeForPerson("SomeStrangePerson", true)
 }
 
-func demoFacadeForPerson(pesonName string) {
+func demoFacadeForPerson(pesonName string, hasRestrictions bool) {
 	fmt.Printf("Person: %s\n", pesonName)
+
 	f := facade.NewFacade(pesonName)
-	f.Seed()
+	f.Seed(hasRestrictions)
 
 	err := f.PrintStatement(
 		time.Date(2020, time.January, 1, 0, 0, 0, 0, time.Local),
 		time.Now(),
 	)
 	if err != nil {
-		fmt.Printf("f.PrintStatement error: %s\n", err.Error())
+		fmt.Printf("f.PrintStatement(1) error: %s\n", err.Error())
 	}
 
 	err = f.Deposit(123)
 	if err != nil {
 		fmt.Printf("f.Deposit error: %s\n", err.Error())
 	}
+
 	err = f.Withdraw(10)
 	if err != nil {
 		fmt.Printf("f.Withdraw error: %s\n", err.Error())
+	}
+
+	err = f.PrintStatement(
+		time.Date(2020, time.January, 1, 0, 0, 0, 0, time.Local),
+		time.Now(),
+	)
+	if err != nil {
+		fmt.Printf("f.PrintStatement(2) error: %s\n", err.Error())
 	}
 }
