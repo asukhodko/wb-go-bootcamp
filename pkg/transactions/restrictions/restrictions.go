@@ -14,3 +14,8 @@ func NewAccountRestrictions() *AccountRestrictions {
 func (r *AccountRestrictions) SetupRestrictions(hasRestrictions bool) {
 	r.hasRestrictions = hasRestrictions
 }
+
+// IsRestricted возвращает информацию о наличии ограничений
+func (r *AccountRestrictions) IsRestricted() bool {
+	return r.hasRestrictions
+}

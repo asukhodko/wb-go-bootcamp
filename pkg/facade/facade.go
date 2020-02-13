@@ -1,10 +1,13 @@
 package facade
 
 import (
+	"errors"
 	"fmt"
+	"time"
+
+	"github.com/asukhodko/wb-go-bootcamp-1/pkg/notification"
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/transactions"
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/transactions/restrictions"
-	"time"
 )
 
 // Facade - фасад для работы со счётом
@@ -12,15 +15,17 @@ type Facade struct {
 	person       *transactions.Person
 	account      *transactions.Account
 	restrictions *restrictions.AccountRestrictions
+	notifier     notification.Notifier
 }
 
 // NewFacade конструирует новый фасад
-func NewFacade(personName string) Facade {
-	person := transactions.NewPerson(personName)
+func NewFacade(personName string, phoneNumber string) Facade {
+	person := transactions.NewPerson(personName, phoneNumber)
 	return Facade{
 		person:       person,
 		account:      transactions.NewAccount(person),
 		restrictions: restrictions.NewAccountRestrictions(),
+		notifier:     notification.NewNotifier(),
 	}
 }
 
@@ -36,7 +41,7 @@ func (f *Facade) Seed(hasRestrictions bool) {
 }
 
 // PrintStatement печатает выписку по счёту
-func (f *Facade) PrintStatement(from, to time.Time) error {
+func (f *Facade) PrintStatement(from, to time.Time) {
 	fmt.Printf("\tStatement from %s to %s\n", from.Format("2006-01-02"), to.Format("2006-01-02"))
 	inBal, outBal, ops := f.account.GetStatement(from, to)
 	fmt.Printf("\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.account.GetBalance())
@@ -44,15 +49,40 @@ func (f *Facade) PrintStatement(from, to time.Time) error {
 	for _, op := range ops {
 		fmt.Printf("\t\t\t%s\n", op.String())
 	}
-	return nil
 }
 
 // Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
-func (f *Facade) Deposit(amount float32) error {
-	return f.account.Deposit(amount)
+func (f *Facade) Deposit(amount float32) {
+	var message string
+	var err error
+	if f.restrictions.IsRestricted() {
+		err = errors.New("Account restricted")
+	}
+	if err == nil {
+		err = f.account.Deposit(amount)
+	}
+	if err == nil {
+		message = fmt.Sprintf("Account refilled by %.2f, balance: %.2f", amount, f.account.GetBalance())
+	} else {
+		message = fmt.Sprintf("Account not refilled: %s", err.Error())
+	}
+	f.notifier.Notify(f.person.GetPhoneNumber(), message)
 }
 
 // Withdraw осуществляет снятие со счёта, если нет ограничений и достаточно средств, и уведомляет владельца счёта об операции
-func (f *Facade) Withdraw(amount float32) error {
-	return f.account.Withdraw(amount)
+func (f *Facade) Withdraw(amount float32) {
+	var message string
+	var err error
+	if f.restrictions.IsRestricted() {
+		err = errors.New("Account restricted")
+	}
+	if err == nil {
+		err = f.account.Withdraw(amount)
+	}
+	if err == nil {
+		message = fmt.Sprintf("Successful withdrawal from the account by %.2f, balance: %.2f", amount, f.account.GetBalance())
+	} else {
+		message = fmt.Sprintf("Account withdrawal failed: %s", err.Error())
+	}
+	f.notifier.Notify(f.person.GetPhoneNumber(), message)
 }
