@@ -35,7 +35,12 @@ func demoFacadeForPerson(pesonName string, hasRestrictions bool) {
 
 	err = f.Withdraw(10)
 	if err != nil {
-		fmt.Printf("f.Withdraw error: %s\n", err.Error())
+		fmt.Printf("f.Withdraw(1) error: %s\n", err.Error())
+	}
+
+	err = f.Withdraw(200)
+	if err != nil {
+		fmt.Printf("f.Withdraw(2) error: %s\n", err.Error())
 	}
 
 	err = f.PrintStatement(

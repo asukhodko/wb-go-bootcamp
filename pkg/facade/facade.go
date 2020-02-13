@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+// Facade - фасад для работы со счётом
 type Facade struct {
 	person       *transactions.Person
 	account      *transactions.Account
 	restrictions *restrictions.AccountRestrictions
 }
 
+// NewFacade конструирует новый фасад
 func NewFacade(personName string) Facade {
 	person := transactions.NewPerson(personName)
 	return Facade{
@@ -22,6 +24,7 @@ func NewFacade(personName string) Facade {
 	}
 }
 
+// Seed заполняет начальными данными
 func (f *Facade) Seed(hasRestrictions bool) {
 	f.restrictions.SetupRestrictions(hasRestrictions)
 	_ = f.account.Deposit(1.22)
@@ -32,6 +35,7 @@ func (f *Facade) Seed(hasRestrictions bool) {
 	_ = f.account.Deposit(22)
 }
 
+// PrintStatement печатает выписку по счёту
 func (f *Facade) PrintStatement(from, to time.Time) error {
 	fmt.Printf("\tStatement from %s to %s\n", from.Format("2006-01-02"), to.Format("2006-01-02"))
 	inBal, outBal, ops := f.account.GetStatement(from, to)
@@ -43,10 +47,12 @@ func (f *Facade) PrintStatement(from, to time.Time) error {
 	return nil
 }
 
+// Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
 func (f *Facade) Deposit(amount float32) error {
 	return f.account.Deposit(amount)
 }
 
+// Withdraw осуществляет снятие со счёта, если нет ограничений и достаточно средств, и уведомляет владельца счёта об операции
 func (f *Facade) Withdraw(amount float32) error {
 	return f.account.Withdraw(amount)
 }

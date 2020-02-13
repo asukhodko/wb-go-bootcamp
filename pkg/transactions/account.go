@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Account представляет счёт
 type Account struct {
 	person  *Person
 	ops     []Operation
@@ -59,6 +60,7 @@ func (a *Account) GetStatement(from, to time.Time) (inBal, outBal float32, ops [
 	return
 }
 
+// GetBalance возвращает текущий остаток
 func (a *Account) GetBalance() float32 {
 	return a.balance
 }
