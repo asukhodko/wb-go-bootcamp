@@ -11,26 +11,23 @@ import (
 )
 
 // Facade - фасад для работы со счётом
-type Facade struct {
+type Facade interface {
+	Seed(hasRestrictions bool)
+	PrintStatement(from, to time.Time)
+	Deposit(amount float32)
+	Withdraw(amount float32)
+}
+
+type facade struct {
+	Facade
 	person       *transactions.Person
 	account      *transactions.Account
 	restrictions *restrictions.AccountRestrictions
 	notifier     notification.Notifier
 }
 
-// NewFacade конструирует новый фасад
-func NewFacade(personName string, phoneNumber string) Facade {
-	person := transactions.NewPerson(personName, phoneNumber)
-	return Facade{
-		person:       person,
-		account:      transactions.NewAccount(person),
-		restrictions: restrictions.NewAccountRestrictions(),
-		notifier:     notification.NewNotifier(),
-	}
-}
-
 // Seed заполняет начальными данными
-func (f *Facade) Seed(hasRestrictions bool) {
+func (f *facade) Seed(hasRestrictions bool) {
 	f.restrictions.SetupRestrictions(hasRestrictions)
 	_ = f.account.Deposit(1.22)
 	_ = f.account.Deposit(5)
@@ -41,7 +38,7 @@ func (f *Facade) Seed(hasRestrictions bool) {
 }
 
 // PrintStatement печатает выписку по счёту
-func (f *Facade) PrintStatement(from, to time.Time) {
+func (f *facade) PrintStatement(from, to time.Time) {
 	fmt.Printf("\tStatement from %s to %s\n", from.Format("2006-01-02"), to.Format("2006-01-02"))
 	inBal, outBal, ops := f.account.GetStatement(from, to)
 	fmt.Printf("\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.account.GetBalance())
@@ -52,7 +49,7 @@ func (f *Facade) PrintStatement(from, to time.Time) {
 }
 
 // Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
-func (f *Facade) Deposit(amount float32) {
+func (f *facade) Deposit(amount float32) {
 	var message string
 	var err error
 	if f.restrictions.IsRestricted() {
@@ -70,7 +67,7 @@ func (f *Facade) Deposit(amount float32) {
 }
 
 // Withdraw осуществляет снятие со счёта, если нет ограничений и достаточно средств, и уведомляет владельца счёта об операции
-func (f *Facade) Withdraw(amount float32) {
+func (f *facade) Withdraw(amount float32) {
 	var message string
 	var err error
 	if f.restrictions.IsRestricted() {
@@ -85,4 +82,15 @@ func (f *Facade) Withdraw(amount float32) {
 		message = fmt.Sprintf("Account withdrawal failed: %s", err.Error())
 	}
 	f.notifier.Notify(f.person.GetPhoneNumber(), message)
+}
+
+// NewFacade конструирует новый фасад
+func NewFacade(personName string, phoneNumber string) Facade {
+	person := transactions.NewPerson(personName, phoneNumber)
+	return &facade{
+		person:       person,
+		account:      transactions.NewAccount(person),
+		restrictions: restrictions.NewAccountRestrictions(),
+		notifier:     notification.NewNotifier(),
+	}
 }
