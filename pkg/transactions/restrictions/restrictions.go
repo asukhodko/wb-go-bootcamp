@@ -1,21 +1,26 @@
 package restrictions
 
-// AccountRestrictions представляет ограничения по счёту
-type AccountRestrictions struct {
+type Checker interface {
+	SetupRestrictions(hasRestrictions bool)
+	IsRestricted() bool
+}
+
+type accountRestrictions struct {
+	Checker
 	hasRestrictions bool
 }
 
-// NewAccountRestrictions конструирует экземпляр AccountRestrictions
-func NewAccountRestrictions() *AccountRestrictions {
-	return &AccountRestrictions{}
-}
-
 // SetupRestrictions выполняет конфигурирование ограничений
-func (r *AccountRestrictions) SetupRestrictions(hasRestrictions bool) {
+func (r *accountRestrictions) SetupRestrictions(hasRestrictions bool) {
 	r.hasRestrictions = hasRestrictions
 }
 
 // IsRestricted возвращает информацию о наличии ограничений
-func (r *AccountRestrictions) IsRestricted() bool {
+func (r *accountRestrictions) IsRestricted() bool {
 	return r.hasRestrictions
+}
+
+// NewChecker конструирует экземпляр для Checker
+func NewChecker() Checker {
+	return &accountRestrictions{}
 }

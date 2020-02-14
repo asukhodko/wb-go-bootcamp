@@ -16,7 +16,7 @@ func main() {
 func demoFacadeForPerson(pesonName string, phoneNumber string, hasRestrictions bool) {
 	fmt.Printf("Person: %s\n", pesonName)
 
-	f := facade.NewFacade(pesonName, phoneNumber)
+	f := facade.NewAccountManager(pesonName, phoneNumber)
 	f.Seed(hasRestrictions)
 
 	f.PrintStatement(

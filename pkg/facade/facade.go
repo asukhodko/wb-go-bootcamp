@@ -10,8 +10,8 @@ import (
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/transactions/restrictions"
 )
 
-// Facade - фасад для работы со счётом
-type Facade interface {
+// AccountManager - фасад для работы со счётом
+type AccountManager interface {
 	Seed(hasRestrictions bool)
 	PrintStatement(from, to time.Time)
 	Deposit(amount float32)
@@ -19,10 +19,10 @@ type Facade interface {
 }
 
 type facade struct {
-	Facade
+	AccountManager
 	person       *transactions.Person
 	account      *transactions.Account
-	restrictions *restrictions.AccountRestrictions
+	restrictions restrictions.Checker
 	notifier     notification.Notifier
 }
 
@@ -84,13 +84,13 @@ func (f *facade) Withdraw(amount float32) {
 	f.notifier.Notify(f.person.GetPhoneNumber(), message)
 }
 
-// NewFacade конструирует новый фасад
-func NewFacade(personName string, phoneNumber string) Facade {
+// NewAccountManager конструирует новый фасад
+func NewAccountManager(personName string, phoneNumber string) AccountManager {
 	person := transactions.NewPerson(personName, phoneNumber)
 	return &facade{
 		person:       person,
 		account:      transactions.NewAccount(person),
-		restrictions: restrictions.NewAccountRestrictions(),
+		restrictions: restrictions.NewChecker(),
 		notifier:     notification.NewNotifier(),
 	}
 }
