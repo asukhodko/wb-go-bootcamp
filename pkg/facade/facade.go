@@ -21,7 +21,7 @@ type AccountManager interface {
 type facade struct {
 	AccountManager
 	person       *transactions.Person
-	account      *transactions.Account
+	account      transactions.AccountManager
 	restrictions restrictions.Checker
 	notifier     notification.Notifier
 }
@@ -44,7 +44,7 @@ func (f *facade) PrintStatement(from, to time.Time) {
 	fmt.Printf("\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.account.GetBalance())
 	fmt.Println("\t\tOperations:")
 	for _, op := range ops {
-		fmt.Printf("\t\t\t%s\n", op.String())
+		fmt.Printf("\t\t\tDate: %s, Amount: %+.2f\n", op.Date.Format("2006-01-02"), op.Amount)
 	}
 }
 
@@ -89,7 +89,7 @@ func NewAccountManager(personName string, phoneNumber string) AccountManager {
 	person := transactions.NewPerson(personName, phoneNumber)
 	return &facade{
 		person:       person,
-		account:      transactions.NewAccount(person),
+		account:      transactions.NewAccountManager(),
 		restrictions: restrictions.NewChecker(),
 		notifier:     notification.NewNotifier(),
 	}
