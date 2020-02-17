@@ -5,33 +5,35 @@ import (
 	"time"
 )
 
-// Account представляет счёт
-type Account struct {
-	person  *Person
+// AccountManager предоставляет операции для работы со счётом
+type AccountManager interface {
+	Deposit(amount float32) error
+	Withdraw(amount float32) error
+	GetStatement(from, to time.Time) (inBal, outBal float32, ops []Operation)
+	GetBalance() float32
+}
+
+type account struct {
+	AccountManager
 	ops     []Operation
 	balance float32
 }
 
-// NewAccount создаёт новый счёт
-func NewAccount(person *Person) *Account {
-	return &Account{person: person, balance: 0}
-}
-
 // Deposit пополняет счёт
-func (a *Account) Deposit(amount float32) error {
+func (a *account) Deposit(amount float32) error {
 	if amount < 0 {
 		return errors.New("deposit: amount out of range")
 	}
 	a.ops = append(a.ops, Operation{
-		date:   time.Now(),
-		amount: amount,
+		Date:   time.Now(),
+		Amount: amount,
 	})
 	a.balance += amount
 	return nil
 }
 
 // Withdraw снимает со счёта
-func (a *Account) Withdraw(amount float32) error {
+func (a *account) Withdraw(amount float32) error {
 	if amount < 0 {
 		return errors.New("withdraw: amount out of range")
 	}
@@ -39,28 +41,33 @@ func (a *Account) Withdraw(amount float32) error {
 		return errors.New("withdraw: insufficient funds")
 	}
 	a.ops = append(a.ops, Operation{
-		date:   time.Now(),
-		amount: -amount,
+		Date:   time.Now(),
+		Amount: -amount,
 	})
 	a.balance -= amount
 	return nil
 }
 
 // GetStatement возвращает выписку по счёту за период
-func (a *Account) GetStatement(from, to time.Time) (inBal, outBal float32, ops []Operation) {
+func (a *account) GetStatement(from, to time.Time) (inBal, outBal float32, ops []Operation) {
 	for _, op := range a.ops {
-		if op.date.Before(from) {
-			inBal += op.amount
-			outBal += op.amount
-		} else if !op.date.After(to) {
+		if op.Date.Before(from) {
+			inBal += op.Amount
+			outBal += op.Amount
+		} else if !op.Date.After(to) {
 			ops = append(ops, op)
-			outBal += op.amount
+			outBal += op.Amount
 		}
 	}
 	return
 }
 
 // GetBalance возвращает текущий остаток
-func (a *Account) GetBalance() float32 {
+func (a *account) GetBalance() float32 {
 	return a.balance
+}
+
+// NewAccountManager создаёт новый счёт
+func NewAccountManager() AccountManager {
+	return &account{balance: 0}
 }
