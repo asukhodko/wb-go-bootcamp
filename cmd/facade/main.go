@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/asukhodko/wb-go-bootcamp-1/pkg/models"
+	"github.com/asukhodko/wb-go-bootcamp-1/pkg/transactions"
 	"time"
 
 	// поскольку пакеты в `pkg`, а не в `internal`, приходится указывать весь путь до пакета, а не относительно проекта
@@ -13,10 +15,16 @@ func main() {
 	demoFacadeForPerson("SomeStrangePerson", "+19993216547", true)
 }
 
-func demoFacadeForPerson(pesonName string, phoneNumber string, hasRestrictions bool) {
-	fmt.Printf("Person: %s\n", pesonName)
+func demoFacadeForPerson(personName string, phoneNumber string, hasRestrictions bool) {
+	fmt.Printf("Person: %s\n", personName)
 
-	f := facade.NewAccountManager(pesonName, phoneNumber)
+	f := facade.NewAccountManager(
+		&models.Person{
+			Name:        personName,
+			PhoneNumber: phoneNumber,
+		},
+		transactions.NewAccountManager(),
+	)
 	f.Seed(hasRestrictions)
 
 	f.PrintStatement(
