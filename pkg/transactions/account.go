@@ -35,19 +35,21 @@ func (a *account) Deposit(amount float32) (err error) {
 }
 
 // Withdraw снимает со счёта
-func (a *account) Withdraw(amount float32) error {
+func (a *account) Withdraw(amount float32) (err error) {
 	if amount < 0 {
-		return errors.New("withdraw: amount out of range")
+		err = errors.New("withdraw: amount out of range")
+		return
 	}
 	if a.balance-amount < 0 {
-		return errors.New("withdraw: insufficient funds")
+		err = errors.New("withdraw: insufficient funds")
+		return
 	}
 	a.ops = append(a.ops, models.Operation{
 		Date:   time.Now(),
 		Amount: -amount,
 	})
 	a.balance -= amount
-	return nil
+	return
 }
 
 // GetStatement возвращает выписку по счёту за период
