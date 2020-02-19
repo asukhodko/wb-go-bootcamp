@@ -51,8 +51,10 @@ func (f *facade) PrintStatement(from, to time.Time) {
 
 // Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
 func (f *facade) Deposit(amount float32) {
-	var message string
-	var err error
+	var (
+		message string
+		err     error
+	)
 	if f.restrictions.IsRestricted() {
 		err = errors.New("am is restricted")
 	}
@@ -69,8 +71,10 @@ func (f *facade) Deposit(amount float32) {
 
 // Withdraw осуществляет снятие со счёта, если нет ограничений и достаточно средств, и уведомляет владельца счёта об операции
 func (f *facade) Withdraw(amount float32) {
-	var message string
-	var err error
+	var (
+		message string
+		err     error
+	)
 	if f.restrictions.IsRestricted() {
 		err = errors.New("am is restricted")
 	}
