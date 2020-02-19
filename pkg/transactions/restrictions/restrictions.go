@@ -1,5 +1,6 @@
 package restrictions
 
+// Checker предоставляет возможность проверки ограничений по счёту
 type Checker interface {
 	SetupRestrictions(hasRestrictions bool)
 	IsRestricted() bool
