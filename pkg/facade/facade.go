@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/models"
-	"github.com/asukhodko/wb-go-bootcamp-1/pkg/notification"
-	"github.com/asukhodko/wb-go-bootcamp-1/pkg/transactions/restrictions"
 )
 
 type accountManager interface {
@@ -17,9 +15,17 @@ type accountManager interface {
 	GetBalance() float32
 }
 
+type checker interface {
+	SetupRestrictions(hasRestrictions bool)
+	IsRestricted() bool
+}
+
+type notifier interface {
+	Notify(phoneNumber, message string)
+}
+
 // AccountManager - фасад для работы со счётом
 type AccountManager interface {
-	Seed(hasRestrictions bool)
 	Deposit(amount float32)
 	Withdraw(amount float32)
 	PrintStatement(from, to time.Time)
@@ -28,19 +34,8 @@ type AccountManager interface {
 type facade struct {
 	person       *models.Person
 	am           accountManager
-	restrictions restrictions.Checker
-	notifier     notification.Notifier
-}
-
-// Seed заполняет начальными данными
-func (f *facade) Seed(hasRestrictions bool) {
-	f.restrictions.SetupRestrictions(hasRestrictions)
-	_ = f.am.Deposit(1.22)
-	_ = f.am.Deposit(5)
-	_ = f.am.Deposit(12.8)
-	_ = f.am.Withdraw(7)
-	_ = f.am.Withdraw(7.5)
-	_ = f.am.Deposit(22)
+	restrictions checker
+	notifier     notifier
 }
 
 // PrintStatement печатает выписку по счёту
@@ -91,11 +86,11 @@ func (f *facade) Withdraw(amount float32) {
 }
 
 // NewAccountManager конструирует новый фасад
-func NewAccountManager(person *models.Person, am accountManager) AccountManager {
+func NewAccountManager(person *models.Person, am accountManager, checker checker, notifier notifier) AccountManager {
 	return &facade{
 		person:       person,
 		am:           am,
-		restrictions: restrictions.NewChecker(),
-		notifier:     notification.NewNotifier(),
+		restrictions: checker,
+		notifier:     notifier,
 	}
 }

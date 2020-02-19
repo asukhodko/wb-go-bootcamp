@@ -6,7 +6,6 @@ type Checker interface {
 }
 
 type accountRestrictions struct {
-	Checker
 	hasRestrictions bool
 }
 
