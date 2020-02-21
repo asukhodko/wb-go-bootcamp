@@ -9,25 +9,25 @@ import (
 
 // AccountManager предоставляет операции для работы со счётом
 type AccountManager interface {
-	Deposit(amount float32) error
-	Withdraw(amount float32) error
-	GetStatement(from, to time.Time) (inBal, outBal float32, ops []models.Operation)
-	GetBalance() float32
+	Deposit(amount float64) error
+	Withdraw(amount float64) error
+	GetStatement(from, to time.Time) (inBal, outBal float64, ops []models.Operation)
+	GetBalance() float64
 }
 
 type account struct {
 	ops     []models.Operation
-	balance float32
+	balance float64
 }
 
 // Deposit пополняет счёт
-func (a *account) Deposit(amount float32) (err error) {
+func (a *account) Deposit(amount float64) (err error) {
 	if amount < 0 {
 		err = errors.New("deposit: amount out of range")
 		return
 	}
 	a.ops = append(a.ops, models.Operation{
-		Date:   time.Now(),
+		Date:   time.Now().Truncate(time.Hour * 24),
 		Amount: amount,
 	})
 	a.balance += amount
@@ -35,7 +35,7 @@ func (a *account) Deposit(amount float32) (err error) {
 }
 
 // Withdraw снимает со счёта
-func (a *account) Withdraw(amount float32) (err error) {
+func (a *account) Withdraw(amount float64) (err error) {
 	if amount < 0 {
 		err = errors.New("withdraw: amount out of range")
 		return
@@ -45,7 +45,7 @@ func (a *account) Withdraw(amount float32) (err error) {
 		return
 	}
 	a.ops = append(a.ops, models.Operation{
-		Date:   time.Now(),
+		Date:   time.Now().Truncate(time.Hour * 24),
 		Amount: -amount,
 	})
 	a.balance -= amount
@@ -53,7 +53,7 @@ func (a *account) Withdraw(amount float32) (err error) {
 }
 
 // GetStatement возвращает выписку по счёту за период
-func (a *account) GetStatement(from, to time.Time) (inBal, outBal float32, ops []models.Operation) {
+func (a *account) GetStatement(from, to time.Time) (inBal, outBal float64, ops []models.Operation) {
 	for _, op := range a.ops {
 		if op.Date.Before(from) {
 			inBal += op.Amount
@@ -67,7 +67,7 @@ func (a *account) GetStatement(from, to time.Time) (inBal, outBal float32, ops [
 }
 
 // GetBalance возвращает текущий остаток
-func (a *account) GetBalance() float32 {
+func (a *account) GetBalance() float64 {
 	return a.balance
 }
 

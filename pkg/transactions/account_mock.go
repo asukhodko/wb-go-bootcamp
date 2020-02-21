@@ -14,17 +14,20 @@ type AccountManagerMock struct {
 }
 
 // Deposit имитирует пополнение счёта
-func (m *AccountManagerMock) Deposit(amount float32) error {
+func (m *AccountManagerMock) Deposit(amount float64) error {
+	_ = amount
 	return nil
 }
 
 // Deposit имитирует снятие со счёта
-func (m *AccountManagerMock) Withdraw(amount float32) error {
+func (m *AccountManagerMock) Withdraw(amount float64) error {
+	_ = amount
 	return nil
 }
 
 // Deposit имитирует получение выписки
-func (m *AccountManagerMock) GetStatement(from, to time.Time) (inBal, outBal float32, ops []models.Operation) {
+func (m *AccountManagerMock) GetStatement(from, to time.Time) (inBal, outBal float64, ops []models.Operation) {
+	_, _ = from, to
 	inBal = 0
 	outBal = 0
 	ops = nil
@@ -32,6 +35,6 @@ func (m *AccountManagerMock) GetStatement(from, to time.Time) (inBal, outBal flo
 }
 
 // Deposit имитирует получение остатка
-func (m *AccountManagerMock) GetBalance() float32 {
+func (m *AccountManagerMock) GetBalance() float64 {
 	return 0
 }

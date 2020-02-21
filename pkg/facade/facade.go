@@ -9,10 +9,10 @@ import (
 )
 
 type accountManager interface {
-	Deposit(amount float32) (err error)
-	Withdraw(amount float32) (err error)
-	GetStatement(from, to time.Time) (inBal, outBal float32, ops []models.Operation)
-	GetBalance() float32
+	Deposit(amount float64) (err error)
+	Withdraw(amount float64) (err error)
+	GetStatement(from, to time.Time) (inBal, outBal float64, ops []models.Operation)
+	GetBalance() float64
 }
 
 type checker interface {
@@ -26,8 +26,8 @@ type notifier interface {
 
 // AccountManager - фасад для работы со счётом
 type AccountManager interface {
-	Deposit(amount float32)
-	Withdraw(amount float32)
+	Deposit(amount float64)
+	Withdraw(amount float64)
 	PrintStatement(from, to time.Time)
 }
 
@@ -45,12 +45,12 @@ func (f *facade) PrintStatement(from, to time.Time) {
 	fmt.Printf("\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.am.GetBalance())
 	fmt.Println("\t\tOperations:")
 	for _, op := range ops {
-		fmt.Printf("\t\t\tDate: %s, Amount: %+.2f\n", op.Date.Format("2006-01-02"), op.Amount)
+		fmt.Printf("\t\t\t%s\n", op.String())
 	}
 }
 
 // Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
-func (f *facade) Deposit(amount float32) {
+func (f *facade) Deposit(amount float64) {
 	var (
 		message string
 		err     error
@@ -70,7 +70,7 @@ func (f *facade) Deposit(amount float32) {
 }
 
 // Withdraw осуществляет снятие со счёта, если нет ограничений и достаточно средств, и уведомляет владельца счёта об операции
-func (f *facade) Withdraw(amount float32) {
+func (f *facade) Withdraw(amount float64) {
 	var (
 		message string
 		err     error
