@@ -9,5 +9,5 @@ type NotifierMock struct {
 
 // Notify имитирует отправку уведомления
 func (m *NotifierMock) Notify(phoneNumber, message string) {
-
+	m.Called(phoneNumber, message)
 }

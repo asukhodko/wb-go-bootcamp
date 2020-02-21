@@ -9,10 +9,11 @@ type CheckerMock struct {
 
 // SetupRestrictions имитирует установку ограничений
 func (m *CheckerMock) SetupRestrictions(hasRestrictions bool) {
-
+	hasRestrictions = hasRestrictions
 }
 
 // IsRestricted имитирует получение ограничений
 func (m *CheckerMock) IsRestricted() bool {
-	return false
+	args := m.Called()
+	return args.Bool(0)
 }

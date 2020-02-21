@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	// поскольку пакеты в `pkg`, а не в `internal`, приходится указывать весь путь до пакета, а не относительно проекта
@@ -34,7 +35,8 @@ func demoFacadeForPerson(personName string, phoneNumber string, hasRestrictions 
 	)
 	seed(am, checker, hasRestrictions)
 
-	f.PrintStatement(
+	_, _ = f.PrintStatement(
+		os.Stdout,
 		time.Date(2020, time.January, 1, 0, 0, 0, 0, time.Local),
 		time.Now(),
 	)
@@ -43,7 +45,8 @@ func demoFacadeForPerson(personName string, phoneNumber string, hasRestrictions 
 	f.Withdraw(10)
 	f.Withdraw(200)
 
-	f.PrintStatement(
+	_, _ = f.PrintStatement(
+		os.Stdout,
 		time.Date(2020, time.January, 1, 0, 0, 0, 0, time.Local),
 		time.Now(),
 	)

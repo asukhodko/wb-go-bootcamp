@@ -3,6 +3,7 @@ package facade
 import (
 	"errors"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/asukhodko/wb-go-bootcamp-1/pkg/models"
@@ -28,7 +29,7 @@ type notifier interface {
 type AccountManager interface {
 	Deposit(amount float64)
 	Withdraw(amount float64)
-	PrintStatement(from, to time.Time)
+	PrintStatement(w io.Writer, from, to time.Time) (n int, err error)
 }
 
 type facade struct {
@@ -39,14 +40,35 @@ type facade struct {
 }
 
 // PrintStatement печатает выписку по счёту
-func (f *facade) PrintStatement(from, to time.Time) {
-	fmt.Printf("\tStatement from %s to %s\n", from.Format("2006-01-02"), to.Format("2006-01-02"))
-	inBal, outBal, ops := f.am.GetStatement(from, to)
-	fmt.Printf("\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.am.GetBalance())
-	fmt.Println("\t\tOperations:")
-	for _, op := range ops {
-		fmt.Printf("\t\t\t%s\n", op.String())
+func (f *facade) PrintStatement(w io.Writer, from, to time.Time) (n int, err error) {
+	ln, err := fmt.Fprintf(w, "\tStatement from %s to %s\n", from.Format("2006-01-02"), to.Format("2006-01-02"))
+	n += ln
+	if err != nil {
+		return
 	}
+
+	inBal, outBal, ops := f.am.GetStatement(from, to)
+
+	ln, err = fmt.Fprintf(w, "\t\tIn balance: %.2f, Out balance: %.2f, Current balance: %.2f\n", inBal, outBal, f.am.GetBalance())
+	n += ln
+	if err != nil {
+		return
+	}
+
+	ln, err = fmt.Fprint(w, "\t\tOperations:")
+	n += ln
+	if err != nil {
+		return
+	}
+
+	for _, op := range ops {
+		ln, err = fmt.Fprintf(w, "\t\t\t%s\n", op.String())
+		n += ln
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Deposit осуществляет пополнение счёта, если нет ограничений, и уведомляет владельца счёта об операции
@@ -56,7 +78,7 @@ func (f *facade) Deposit(amount float64) {
 		err     error
 	)
 	if f.restrictions.IsRestricted() {
-		err = errors.New("am is restricted")
+		err = errors.New("account is restricted")
 	}
 	if err == nil {
 		err = f.am.Deposit(amount)
@@ -76,7 +98,7 @@ func (f *facade) Withdraw(amount float64) {
 		err     error
 	)
 	if f.restrictions.IsRestricted() {
-		err = errors.New("am is restricted")
+		err = errors.New("account is restricted")
 	}
 	if err == nil {
 		err = f.am.Withdraw(amount)
